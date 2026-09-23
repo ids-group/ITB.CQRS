@@ -1,12 +1,10 @@
-﻿using System.Threading.Tasks;
 using ITB.CQRS.Abstraction;
-using ITB.ResultModel;
+using ITB.Shared.Result;
 
-namespace ITB.CQRS
+namespace ITB.CQRS;
+
+public abstract class QueryHandlerBase<TIn, TOut> : IQueryHandler<TIn, TOut>
+    where TIn : IQuery<TOut>
 {
-    public abstract class QueryHandlerBase<TIn, TOut> : IQueryHandler<TIn, Task<Result<TOut>>>
-        where TIn : IQuery<Task<Result<TOut>>>
-    {
-        public abstract Task<Result<TOut>> Handle(TIn input);
-    }
+    public abstract Task<Result<TOut>> Handle(TIn input);
 }

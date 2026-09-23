@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>ITB.Shared.Result</RootNamespace>
+    <PackageId>ITB.ResultModel</PackageId>
+    <Description>Result and Failure model used by ITB.CQRS handlers.</Description>
+    <PackageTags>result;failure;cqrs</PackageTags>
+  </PropertyGroup>
+
+</Project>

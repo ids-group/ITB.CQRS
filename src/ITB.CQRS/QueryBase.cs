@@ -1,10 +1,7 @@
-﻿using System.Threading.Tasks;
 using ITB.CQRS.Abstraction;
-using ITB.ResultModel;
 
-namespace ITB.CQRS
+namespace ITB.CQRS;
+
+public class QueryBase<TOut> : IQuery<TOut>
 {
-    public class QueryBase<TOut> : IQuery<Task<Result<TOut>>>
-    {
-    }
 }

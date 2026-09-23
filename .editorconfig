@@ -1,0 +1,36 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{cs,csx}]
+indent_size = 4
+# Namespaces
+csharp_style_namespace_declarations = file_scoped:warning
+# 'this.' qualification not required
+dotnet_style_qualification_for_field = false:silent
+dotnet_style_qualification_for_property = false:silent
+# Prefer var when type is apparent
+csharp_style_var_when_type_is_apparent = true:silent
+csharp_style_var_elsewhere = true:silent
+# Expression-bodied members
+csharp_style_expression_bodied_methods = when_on_single_line:silent
+# using directives outside namespace
+csharp_using_directive_placement = outside_namespace:warning
+dotnet_sort_system_directives_first = true
+
+[*.{json,yml,yaml,csproj,props,targets,slnx}]
+indent_size = 2
+
+[*.{ts,js,html,scss,css}]
+indent_size = 2
+
+[*.{sql}]
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false

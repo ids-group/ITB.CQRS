@@ -1,6 +1,5 @@
-﻿namespace ITB.CQRS.Abstraction
+namespace ITB.CQRS.Abstraction;
+
+public interface IQuery<TOut> : IRequest<TOut>
 {
-    public interface IQuery<TOut> : IRequest<TOut>
-    {
-    }
 }

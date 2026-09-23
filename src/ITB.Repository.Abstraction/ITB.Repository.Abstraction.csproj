@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>ITB.Repository.Abstraction</RootNamespace>
+    <PackageId>ITB.Repository.Abstraction</PackageId>
+    <Description>Abstractions of the Repository pattern for .NET.</Description>
+    <PackageTags>repository;pattern</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ITB.Shared.Domain\ITB.Shared.Domain.csproj" />
+    <ProjectReference Include="..\ITB.Specification\ITB.Specification.csproj" />
+  </ItemGroup>
+
+</Project>

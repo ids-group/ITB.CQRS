@@ -1,15 +1,13 @@
-﻿using System.Threading.Tasks;
 using ITB.CQRS.Abstraction;
-using ITB.ResultModel;
+using ITB.Shared.Result;
 
-namespace ITB.CQRS
+namespace ITB.CQRS;
+
+public interface IHandlerDispatcher
 {
-    public interface IHandlerDispatcher
-    {
-        Task<Result<TOut>> Handle<TIn, TOut>(TIn input)
-            where TIn : IRequest<Task<Result<TOut>>>;
+    Task<Result<TOut>> Handle<TIn, TOut>(TIn input)
+        where TIn : IRequest<TOut>;
 
-        Task<Result> Handle<TIn>(TIn input)
-            where TIn : CommandBase;
-    }
+    Task<Result> Handle<TIn>(TIn input)
+        where TIn : CommandBase;
 }

@@ -1,16 +1,13 @@
-﻿using System;
-using ITB.ResultModel;
+using ITB.Shared.Result;
 using Microsoft.Extensions.Logging;
 
-namespace ITB.CQRS
-{
-    public class CQRSOptions
-    {
-        public Func<Exception, ILogger, ExceptionFailure> ExceptionHandler { get; set; } = (exception, logger) =>
-        {
-            logger.LogError(exception, exception.Message);
+namespace ITB.CQRS;
 
-            return new ExceptionFailure(exception);
-        };
-    }
+public class CQRSOptions
+{
+    public Func<Exception, ILogger, Failure> ExceptionHandler { get; set; } = (exception, logger) =>
+    {
+        logger.LogError(exception, exception.Message);
+        return new ExceptionFailure(exception);
+    };
 }

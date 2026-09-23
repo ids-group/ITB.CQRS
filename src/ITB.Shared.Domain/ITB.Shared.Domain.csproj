@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>ITB.Domain</RootNamespace>
+    <PackageId>ITB.Shared.Domain</PackageId>
+    <Description>Base entity and queryable filter abstractions shared by ITB.Repository and ITB.CQRS.</Description>
+    <PackageTags>ddd;entity;repository</PackageTags>
+  </PropertyGroup>
+
+</Project>

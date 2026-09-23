@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>ITB.Repository.EntityFrameworkCore</RootNamespace>
+    <PackageId>ITB.Repository.EntityFrameworkCore</PackageId>
+    <Description>Entity Framework Core implementation of the Repository pattern and Unit of Work.</Description>
+    <PackageTags>repository;unit-of-work;ef-core</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ITB.Repository.Abstraction\ITB.Repository.Abstraction.csproj" />
+    <ProjectReference Include="..\ITB.Shared.Domain\ITB.Shared.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
