@@ -1,81 +1,44 @@
-﻿using System;
-using System.Threading.Tasks;
 using ITB.CQRS.Abstraction;
-using ITB.ResultModel;
+using ITB.Shared.Result;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace ITB.CQRS.Decorators
+namespace ITB.CQRS.Decorators;
+
+public class ErrorHandlerDecorator<TIn, TOut>(IHandler<TIn, TOut> decorated, IOptions<CQRSOptions> options, ILogger<ErrorHandlerDecorator<TIn, TOut>> logger) : HandlerDecoratorBase<TIn, TOut>(decorated)
+    where TIn : IRequest<TOut>
 {
-    public class ErrorHandlerDecorator<TIn, TOut> : HandlerDecoratorBase<TIn, TOut>
-        where TIn : IRequest<Task<Result<TOut>>>
+    private readonly CQRSOptions _options = options.Value;
+    private readonly ILogger _logger = logger;
+
+    public override async Task<Result<TOut>> Handle(TIn input)
     {
-        private readonly CQRSOptions _options;
-        private readonly ILogger _logger;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="decorated"></param>
-        /// <param name="options"></param>
-        /// <param name="logger"></param>
-        public ErrorHandlerDecorator(IHandler<TIn, Task<Result<TOut>>> decorated, IOptions<CQRSOptions> options, ILogger logger) : base(decorated)
+        try
         {
-            _logger = logger;
-            _options = options.Value;
+            return await Decorated.Handle(input);
         }
-
-        /// <summary>
-        /// Decorated Handle
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public override async Task<Result<TOut>> Handle(TIn input)
+        catch (Exception ex)
         {
-            try
-            {
-                return await Decorated.Handle(input);
-            }
-            catch (Exception ex)
-            {
-                return _options.ExceptionHandler(ex, _logger);
-            }
+            return _options.ExceptionHandler(ex, _logger);
         }
     }
+}
 
-    public class ErrorHandlerDecorator<TIn> : HandlerDecoratorBase<TIn>
-        where TIn : IRequest<Task<Result>>
+public class ErrorHandlerDecorator<TIn>(IHandler<TIn> decorated, IOptions<CQRSOptions> options, ILogger<ErrorHandlerDecorator<TIn>> logger) : HandlerDecoratorBase<TIn>(decorated)
+    where TIn : IRequest
+{
+    private readonly CQRSOptions _options = options.Value;
+    private readonly ILogger _logger = logger;
+
+    public override async Task<Result> Handle(TIn input)
     {
-        private readonly CQRSOptions _options;
-        private readonly ILogger _logger;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="decorated"></param>
-        /// <param name="options"></param>
-        /// <param name="logger"></param>
-        public ErrorHandlerDecorator(IHandler<TIn, Task<Result>> decorated, IOptions<CQRSOptions> options, ILogger logger) : base(decorated)
+        try
         {
-            _logger = logger;
-            _options = options.Value;
+            return await Decorated.Handle(input);
         }
-
-        /// <summary>
-        /// Decorated Handle
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public override async Task<Result> Handle(TIn input)
+        catch (Exception ex)
         {
-            try
-            {
-                return await Decorated.Handle(input);
-            }
-            catch (Exception ex)
-            {
-                return _options.ExceptionHandler(ex, _logger);
-            }
+            return _options.ExceptionHandler(ex, _logger);
         }
     }
 }

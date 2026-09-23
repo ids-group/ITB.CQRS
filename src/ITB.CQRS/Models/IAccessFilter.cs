@@ -1,9 +1,8 @@
-﻿using ITB.Shared.Domain;
+using ITB.Domain.Interfaces;
 
-namespace ITB.CQRS.Models
+namespace ITB.CQRS.Models;
+
+public interface IAccessFilter<T> : IQueryableFilter<T>
+    where T : class
 {
-    public interface IAccessFilter<T> : IQueryableFilter<T>
-        where T : class
-    {
-    }
 }

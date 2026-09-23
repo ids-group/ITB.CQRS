@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Derive version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing version $VERSION"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Test
+        run: dotnet test --no-build -c Release --logger "console;verbosity=minimal"
+
+      - name: Pack
+        run: >-
+          dotnet pack ITB.CQRS.slnx
+          -c Release --no-build
+          -p:Version=${{ steps.version.outputs.version }}
+          -o artifacts
+
+      - name: Authenticate to NuGet
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ids-group
+
+      - name: Publish to NuGet
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: |
+          # No --skip-duplicate: it turns a server-side rejection into a zero exit code,
+          # so the job goes green while nothing is published. A tag that collides with an
+          # existing version should fail loudly and be re-cut under a new version instead.
+          # The .snupkg symbol packages next to each .nupkg are pushed automatically.
+          dotnet nuget push "artifacts/*.nupkg" \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+          generate_release_notes: true
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}

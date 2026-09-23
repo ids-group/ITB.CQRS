@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ITB.CQRS/ITB.CQRS.csproj" />
+    <Project Path="src/ITB.Repository.Abstraction/ITB.Repository.Abstraction.csproj" />
+    <Project Path="src/ITB.Repository.EntityFrameworkCore/ITB.Repository.EntityFrameworkCore.csproj" />
+    <Project Path="src/ITB.Shared.Domain/ITB.Shared.Domain.csproj" />
+    <Project Path="src/ITB.Shared.Result/ITB.Shared.Result.csproj" />
+    <Project Path="src/ITB.Specification/ITB.Specification.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ITB.CQRS.UnitTests/ITB.CQRS.UnitTests.csproj" />
+  </Folder>
+</Solution>

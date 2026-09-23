@@ -1,44 +1,32 @@
-﻿using System;
-using System.Threading.Tasks;
 using ITB.CQRS.Abstraction;
-using ITB.ResultModel;
-using SimpleInjector;
+using ITB.Shared.Result;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace ITB.CQRS
+namespace ITB.CQRS;
+
+public class HandlerDispatcher(IServiceProvider serviceProvider) : IHandlerDispatcher
 {
-    public class HandlerDispatcher : IHandlerDispatcher
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+
+    public async Task<Result> Handle<TIn>(TIn input)
+        where TIn : CommandBase
     {
-        private readonly Container _container;
+        if (input == null)
+            throw new ArgumentNullException(nameof(input));
 
-        public HandlerDispatcher(Container container)
-        {
-            _container = container;
-        }
+        var handler = _serviceProvider.GetRequiredService<IHandler<TIn>>();
 
-        public async Task<Result> Handle<TIn>(TIn input)
-            where TIn : CommandBase
-        {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
+        return await handler.Handle(input);
+    }
 
-            var handler = (IHandler<TIn, Task<Result>>)_container.GetInstance(typeof(IHandler<TIn, Task<Result>>));
+    public async Task<Result<TOut>> Handle<TIn, TOut>(TIn input)
+        where TIn : IRequest<TOut>
+    {
+        if (input == null)
+            throw new ArgumentNullException(nameof(input));
 
-            return await handler.Handle(input);
-        }
+        var handler = _serviceProvider.GetRequiredService<IHandler<TIn, TOut>>();
 
-        public async Task<Result<TOut>> Handle<TIn, TOut>(TIn input)
-            where TIn : IRequest<Task<Result<TOut>>>
-        {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
-
-            var handler = (IHandler<TIn, Task<Result<TOut>>>)_container.GetInstance(typeof(IHandler<TIn, Task<Result<TOut>>>));
-
-            return await handler.Handle(input);
-        }
+        return await handler.Handle(input);
     }
 }

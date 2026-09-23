@@ -1,15 +1,11 @@
-﻿using System.Threading.Tasks;
 using ITB.CQRS.Abstraction;
-using ITB.ResultModel;
 
-namespace ITB.CQRS
+namespace ITB.CQRS;
+
+public class CommandBase<TOut> : ICommand<TOut>
 {
-    public class CommandBase<TOut> : ICommand<Task<Result<TOut>>>
-    {
-    }
+}
 
-    public class CommandBase : ICommand<Task<Result>>
-    {
-
-    }
+public class CommandBase : ICommand
+{
 }

@@ -1,0 +1,95 @@
+namespace ITB.Shared.Result;
+
+public class Result
+{
+    public bool IsSuccess => Failure == null;
+
+    public Failure Failure { get; set; }
+
+    public Result(Failure failure)
+    {
+        Failure = failure;
+    }
+
+    public Result()
+    {
+    }
+
+    public static Result Success()
+    {
+        return new Result();
+    }
+
+    public static Failure Fail(string message)
+    {
+        return new Failure(message);
+    }
+
+    public static Failure NotFound(string message)
+    {
+        return new NotFoundFailure(message);
+    }
+
+    public static Failure Unauthorized(string message)
+    {
+        return new UnauthorizedFailure(message);
+    }
+
+    public static Failure Forbidden(string message)
+    {
+        return new ForbiddenFailure(message);
+    }
+
+    public static Failure Conflict(string message)
+    {
+        return new ConflictFailure(message);
+    }
+
+    // HTTP 429, account lockout.
+    public static Failure Locked(string message)
+    {
+        return new LockedFailure(message);
+    }
+
+    public static Failure Conflict(string code, string message)
+    {
+        return new CodedConflictFailure(code, message);
+    }
+
+    public static Failure ValidationError(ValidationError validationError)
+    {
+        return new ValidationFailure(validationError);
+    }
+
+    public static Failure ValidationError(ValidationError[] validationErrors)
+    {
+        return new ValidationFailure(validationErrors);
+    }
+
+    public static implicit operator Result(Failure failure) => new Result(failure);
+}
+
+public class Result<TObject> : Result
+{
+    public TObject Data { get; set; }
+
+    public Result()
+    {
+    }
+
+    public Result(TObject data)
+    {
+        Data = data;
+    }
+
+    public Result(Failure failure) : base(failure)
+    {
+    }
+
+    public static implicit operator Result<TObject>(TObject value)
+    {
+        return new Result<TObject>(value);
+    }
+
+    public static implicit operator Result<TObject>(Failure failure) => new Result<TObject>(failure);
+}

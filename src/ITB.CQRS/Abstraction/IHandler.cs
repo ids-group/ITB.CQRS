@@ -1,8 +1,15 @@
-﻿namespace ITB.CQRS.Abstraction
+using ITB.Shared.Result;
+
+namespace ITB.CQRS.Abstraction;
+
+public interface IHandler<in TIn, TOut>
+    where TIn : IRequest<TOut>
 {
-    public interface IHandler<in TIn, out TOut>
-        where TIn : IRequest<TOut>
-    {
-        TOut Handle(TIn input);
-    }
+    Task<Result<TOut>> Handle(TIn input);
+}
+
+public interface IHandler<in TIn>
+    where TIn : IRequest
+{
+    Task<Result> Handle(TIn input);
 }
