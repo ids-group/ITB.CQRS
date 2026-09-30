@@ -11,6 +11,8 @@ CQRS, Repository and Specification building blocks for .NET 10 applications on E
 | `ITB.ResultModel` | `ITB.Shared.Result` | `Result`, `Result<T>` and the `Failure` hierarchy |
 | `ITB.Shared.Domain` | `ITB.Domain.Entities`, `ITB.Domain.Interfaces` | `IEntity`, `Entity<TKey>`, `IQueryableFilter<T>` |
 
+Full usage guide with copy-pasteable boilerplate: [HOWTOUSE.md](https://github.com/ids-group/ITB.CQRS/blob/master/HOWTOUSE.md)
+
 ## Getting started
 
 ```bash
