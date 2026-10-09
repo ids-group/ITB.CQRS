@@ -377,8 +377,9 @@ Every handler is wrapped, outermost first:
    returns `ForbiddenFailure` on the first invalid result.
 3. **`ValidationHandlerDecorator`** - runs every registered FluentValidation `IValidator<TIn>` and returns
    `ValidationFailure` with one `ValidationError` per broken rule.
-4. **`TransactionHandlerDecorator`** - opens a transaction inside the EF execution strategy for commands
-   and commits only when the `Result` is successful.
+4. **`TransactionHandlerDecorator`** - opens a transaction inside the EF execution strategy for commands,
+   commits only when the `Result` is successful and rolls back otherwise, then tells every registered
+   `ITransactionParticipant` how it ended (see [After commit](#after-commit)).
 
 That order is the reverse of the registration order in `CQRSServiceCollectionExtensions`
 (`TryDecorate(Transaction)`, `Decorate(Validation)`, `Decorate(Permission)`, `Decorate(Error)`): the last
@@ -462,3 +463,94 @@ public class ImportClientsHandler(IRepository<Client> clients, IUnitOfWork unitO
 `IgnoreTransactionAttribute` lives in `ITB.CQRS.Decorators`, not `ITB.CQRS`. Without it the command runs
 inside a single transaction that commits only when the whole `Result` is successful, which is what you want
 for almost everything else.
+
+### After commit
+
+Some side effects must not happen until the data is really in the database: an email about a client
+that a later rollback removes is worse than no email. Implement `ITransactionParticipant` to hear how the
+command's transaction ended, buffer the work in the handler, and flush it in `Committed`.
+
+```csharp
+using ITB.CQRS;
+using ITB.CQRS.Abstraction;
+using ITB.Repository.Abstraction;
+using ITB.Repository.EntityFrameworkCore;
+using ITB.Shared.Result;
+
+// Your own abstraction over the mail service; register it in DI as usual.
+public interface IEmailSender
+{
+    Task Send(string to, string subject);
+}
+
+// Collects emails during the command and sends them only once the transaction has committed.
+public class ClientEmails(IEmailSender sender) : ITransactionParticipant
+{
+    private readonly List<string> _subjects = new();
+
+    public void Enqueue(string subject) => _subjects.Add(subject);
+
+    public async Task Committed()
+    {
+        foreach (var subject in _subjects)
+        {
+            await sender.Send("clients@example.com", subject);
+        }
+
+        _subjects.Clear();
+    }
+
+    // Called once per rolled-back attempt, so a retry starts from an empty buffer.
+    public Task Abandoned()
+    {
+        _subjects.Clear();
+        return Task.CompletedTask;
+    }
+}
+
+public class RegisterClient : CommandBase<int>
+{
+    public string Name { get; set; }
+}
+
+public class RegisterClientHandler(IRepository<Client> clients, IUnitOfWork unitOfWork, ClientEmails emails)
+    : CommandHandlerBase<RegisterClient, int>
+{
+    public override async Task<Result<int>> Handle(RegisterClient input)
+    {
+        var client = await clients.Add(new Client(input.Name));
+        await unitOfWork.SaveChanges();
+
+        emails.Enqueue($"Client {client.Name} registered");
+
+        return client.Id;
+    }
+}
+```
+
+Register the participant as scoped, once under its own type for the handler and once forwarded to
+`ITransactionParticipant` for the decorator, so both get the same instance:
+
+```csharp
+using ITB.CQRS.Abstraction;
+using Microsoft.Extensions.DependencyInjection;
+
+builder.Services.AddScoped<ClientEmails>();
+builder.Services.AddScoped<ITransactionParticipant>(sp => sp.GetRequiredService<ClientEmails>());
+```
+
+What the decorator guarantees:
+
+- **`Committed()`** fires once, after the execution strategy has returned, so it never fires for an
+  attempt that is later retried.
+- **`Abandoned()`** fires after the transaction is rolled back, for a failed `Result` and for an exception
+  alike (commit failures included). With a retrying execution strategy it can fire once per attempt. The
+  exception is rethrown afterwards, so `ErrorHandlerDecorator` still turns it into a `Failure`.
+- **A participant that throws is logged and swallowed.** In `Committed()` the data is already in the
+  database, so the command still returns success; in `Abandoned()` the original failure or exception is
+  kept. The remaining participants are still called.
+- **`[IgnoreTransaction]` commands send no signals.** There is no transaction to report on.
+- Every registered participant hears about every transactional command in the scope, not only the ones
+  that used it, so keep `Committed()` and `Abandoned()` cheap when there is nothing buffered.
+- The rollback is explicit (`RollbackAsync()`), so EF's own rollback notifications - for example a
+  `DbTransactionInterceptor.TransactionRolledBack` - fire as well.

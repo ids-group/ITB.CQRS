@@ -24,6 +24,10 @@
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <!-- Relational provider for the transaction tests: EF's InMemory provider ignores transactions. -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+    <!-- Native SQLite only. The Sqlite provider pulls 2.1.11, which carries GHSA-2m69-gcr7-jv3q (NU1903). -->
+    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
   </ItemGroup>
 
 </Project>
