@@ -62,7 +62,7 @@ Every handler is wrapped by decorators, outermost first:
 1. **ErrorHandlerDecorator** turns an unhandled exception into an `ExceptionFailure` (configurable through `CQRSOptions.ExceptionHandler`).
 2. **PermissionValidationHandlerDecorator** runs every `IPermissionValidator<TIn>` and returns `ForbiddenFailure` on failure.
 3. **ValidationHandlerDecorator** runs every FluentValidation `IValidator<TIn>` and returns `ValidationFailure`.
-4. **TransactionHandlerDecorator** wraps commands (`CommandBase`) in a database transaction inside the EF execution strategy and commits only on success. Mark a command with `[IgnoreTransaction]` to opt out.
+4. **TransactionHandlerDecorator** wraps commands (`CommandBase`) in a database transaction inside the EF execution strategy and commits only on success, rolls back otherwise, and tells every registered `ITransactionParticipant` whether it committed or was abandoned (see [After commit](https://github.com/ids-group/ITB.CQRS/blob/master/HOWTOUSE.md#after-commit)). Mark a command with `[IgnoreTransaction]` to opt out.
 
 ## Filtered lists
 
